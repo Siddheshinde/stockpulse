@@ -6,6 +6,8 @@ import com.stockpulse.dto.ProductDto;
 import com.stockpulse.exception.ResourceNotFoundException;
 import com.stockpulse.repository.InventorySnapshotRepository;
 import com.stockpulse.repository.ProductRepository;
+import com.stockpulse.event.ProductStateChangedEvent;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,10 +20,14 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final InventorySnapshotRepository snapshotRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
-    public ProductService(ProductRepository productRepository, InventorySnapshotRepository snapshotRepository) {
+    public ProductService(ProductRepository productRepository, 
+                          InventorySnapshotRepository snapshotRepository,
+                          ApplicationEventPublisher eventPublisher) {
         this.productRepository = productRepository;
         this.snapshotRepository = snapshotRepository;
+        this.eventPublisher = eventPublisher;
     }
 
     @Transactional
@@ -66,6 +72,7 @@ public class ProductService {
         product = productRepository.save(product);
         
         createSnapshot(product, TriggerReason.MANUAL);
+        checkAndPublishTriggers(product);
         
         return new ProductDto(product);
     }
@@ -89,8 +96,20 @@ public class ProductService {
         product = productRepository.save(product);
         createSnapshot(product, TriggerReason.MANUAL);
         
-        // Agentic loop logic is deferred to Phase 6
+        checkAndPublishTriggers(product);
+        
         return new ProductDto(product);
+    }
+
+    private void checkAndPublishTriggers(Product product) {
+        if (product.getStockLevel() < product.getReorderThreshold()) {
+            eventPublisher.publishEvent(new ProductStateChangedEvent(this, product.getId(), TriggerReason.INVENTORY_LOW));
+        }
+
+        Double avgVel = productRepository.getAverageVelocityByCategory(product.getCategory());
+        if (avgVel != null && product.getDemandVelocity() > 2 * avgVel) {
+            eventPublisher.publishEvent(new ProductStateChangedEvent(this, product.getId(), TriggerReason.DEMAND_SPIKE));
+        }
     }
 
     private Product getProductEntity(String id) {
