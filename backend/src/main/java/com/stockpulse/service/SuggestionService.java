@@ -106,7 +106,12 @@ public class SuggestionService {
         suggestion.setStatus(req.getStatus());
         suggestion = pricingRepo.save(suggestion);
         
-        // Side effects (updating product price) belong to Phase 7
+        if (req.getStatus() == SuggestionStatus.ACCEPTED) {
+            Product p = suggestion.getProduct();
+            p.setCurrentPrice(suggestion.getRecommendedPrice());
+            productRepo.save(p);
+        }
+        
         return SuggestionDto.fromPricing(suggestion);
     }
 
@@ -126,7 +131,12 @@ public class SuggestionService {
         suggestion.setStatus(req.getStatus());
         suggestion = reorderRepo.save(suggestion);
         
-        // Side effects (updating product stock) belong to Phase 7
+        if (req.getStatus() == SuggestionStatus.ACCEPTED) {
+            Product p = suggestion.getProduct();
+            p.setStockLevel(p.getStockLevel() + suggestion.getRecommendedQuantity());
+            productRepo.save(p);
+        }
+        
         return SuggestionDto.fromReorder(suggestion);
     }
 }
