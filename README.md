@@ -102,7 +102,7 @@ CommerceStrategy
 ```
 
 **Rule-Based Fallback Rules**:
-- **Inventory Low**: Suggests a +10% price increase (to slow velocity) and reorders using the formula `(reorderThreshold * 3) - currentStock`.
+- **Inventory Low**: Suggests a +10% price increase (to slow velocity) and reorders using the formula `max((reorderThreshold * 3) - currentStock, 1)`, ensuring a minimum reorder quantity of 1.
 - **Demand Spike**: Suggests a +5% price increase.
 - **Normal**: Suggests `HOLD` with no changes.
 
@@ -147,8 +147,12 @@ The React frontend serves as the merchandising operations center. The dashboard 
 
 | Method | Endpoint | Purpose |
 |--------|----------|---------|
+| `POST` | `/api/products` | Create a new product |
 | `GET` | `/api/products` | Retrieve all inventory products |
+| `PATCH` | `/api/products/{id}/stock` | Manually update product stock |
 | `POST` | `/api/products/{id}/orders` | Simulate a sale, triggering the agentic loop |
+| `POST` | `/api/products/{id}/suggest-pricing` | Manually trigger AI pricing suggestion |
+| `POST` | `/api/products/{id}/suggest-reorder` | Manually trigger AI reorder suggestion |
 | `GET` | `/api/suggestions` | Retrieve pending recommendations (`?status=PENDING`) |
 | `PATCH` | `/api/pricing-suggestions/{id}` | Accept/Reject a pricing suggestion |
 | `PATCH` | `/api/reorder-suggestions/{id}` | Accept/Reject a reorder suggestion |
@@ -222,7 +226,7 @@ The frontend will run on `http://localhost:5173`.
 StockPulse is engineered for reliability in the face of external system failures:
 - **Fallback Mechanisms**: If the Gemini API times out, returns 500, or provides malformed non-JSON data, the system automatically falls back to deterministic rules.
 - **Validation Constraints**: AI outputs are strictly validated. Negative prices or stock recommendations are rejected during parsing.
-- **Idempotency**: The agentic loop ignores triggers if a `PENDING` suggestion already exists for that product and trigger reason.
+- **Idempotency**: The agentic loop ignores duplicate triggers if a `PENDING` suggestion already exists for the same product, trigger reason, and suggestion type.
 - **Human Approval**: Absolutely no state mutations occur until a human operator confirms the recommendation.
 
 ## Architectural Decisions
@@ -234,7 +238,7 @@ StockPulse is engineered for reliability in the face of external system failures
 
 ## Testing
 
-The system currently has **20** passing automated tests covering the backend logic:
+The system currently has **21** passing automated tests covering the backend logic:
 - `SuggestionServiceTest`: Validates the human checkpoint side effects (acceptance/rejection state transitions).
 - `AgenticEventLoopTest`: Verifies the asynchronous event broadcasting and idempotency protections.
 - `AiStrategyTest`: Mocks the LLM Gateway to test parsing, mapping, and fallback behavior.
