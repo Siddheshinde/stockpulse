@@ -102,7 +102,7 @@ CommerceStrategy
 ```
 
 **Rule-Based Fallback Rules**:
-- **Inventory Low**: Suggests a +10% price increase (to slow velocity) and reorders up to `reorderThreshold * 2`.
+- **Inventory Low**: Suggests a +10% price increase (to slow velocity) and reorders using the formula `(reorderThreshold * 3) - currentStock`.
 - **Demand Spike**: Suggests a +5% price increase.
 - **Normal**: Suggests `HOLD` with no changes.
 
@@ -110,7 +110,7 @@ The engine defaults to `AiStrategy` if configured via the `COMMERCE_STRATEGY` en
 
 ## AI / Gemini Integration
 
-StockPulse integrates with the **Google Gemini API** (`gemini-1.5-flash` or similar models) to perform complex reasoning. 
+StockPulse integrates with the **Google Gemini API** (`gemini-3.6-flash`) to perform complex reasoning. 
 - The AI receives precise product telemetry (current price, stock, thresholds, demand velocity).
 - Specific prompts are injected based on whether the trigger was `INVENTORY_LOW` or `DEMAND_SPIKE`.
 - The AI generates a structured JSON response containing the recommended value, direction, confidence score, and plain-text reasoning.
