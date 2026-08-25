@@ -136,6 +136,26 @@ public class AgenticEventLoopTest {
     }
 
     @Test
+    void testConcurrentIdempotencyPreventsDuplicates() throws InterruptedException {
+        Product p = createProduct("PRD-CONCURRENT", 20, 15, 5);
+
+        // Fire 10 updates rapidly to simulate concurrent requests that would trigger INVENTORY_LOW
+        for (int i = 0; i < 10; i++) {
+            productService.updateStock(p.getId(), 10);
+        }
+
+        // Wait to ensure all background processing finishes
+        Thread.sleep(3000);
+
+        // Even with 10 concurrent requests, there should only be 1 pending suggestion of each type
+        List<PricingSuggestion> pricing = pricingRepo.findAll();
+        List<ReorderSuggestion> reorder = reorderRepo.findAll();
+
+        assertThat(pricing).hasSize(1);
+        assertThat(reorder).hasSize(1);
+    }
+
+    @Test
     void testNoFalseTrigger() {
         Product p = createProduct("PRD-NORMAL", 50, 15, 5);
 

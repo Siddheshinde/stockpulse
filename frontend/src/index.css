@@ -1,32 +1,32 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 :root {
-  /* Colors - Enterprise Charcoal Theme */
-  --bg-color: #121212;
-  --surface-color: #18181b;
-  --surface-hover: #27272a;
+  /* Colors - Enterprise Charcoal Theme (Matte Glass) */
+  --bg-color: #111113; /* Warm charcoal background */
+  --surface-color: rgba(30, 30, 34, 0.6); /* Slightly lighter smoke glass panel */
+  --surface-hover: rgba(45, 45, 50, 0.7);
   
-  --border-color: #27272a;
-  --border-light: #3f3f46;
+  --border-color: rgba(255, 255, 255, 0.08); /* Thin low-contrast borders */
+  --border-light: rgba(255, 255, 255, 0.12);
   
-  --text-primary: #f4f4f5;
-  --text-secondary: #a1a1aa;
-  --text-muted: #71717a;
+  --text-primary: #f8f8f8; /* Off-white text */
+  --text-secondary: #a8a8af; /* Muted secondary text */
+  --text-muted: #787882;
   
-  --accent: #3b82f6;
-  --accent-hover: #2563eb;
+  --accent: #52525b; /* Neutralized accent */
+  --accent-hover: #71717a;
   
-  /* Status Colors (Semantic) */
+  /* Status Colors (Semantic but restrained) */
   --success: #10b981;
   --warning: #f59e0b;
   --danger: #ef4444;
   --neutral: #71717a;
   
   /* Background variants for badges */
-  --success-bg: rgba(16, 185, 129, 0.15);
-  --warning-bg: rgba(245, 158, 11, 0.15);
-  --danger-bg: rgba(239, 68, 68, 0.15);
-  --neutral-bg: rgba(113, 113, 122, 0.15);
+  --success-bg: rgba(16, 185, 129, 0.1);
+  --warning-bg: rgba(245, 158, 11, 0.1);
+  --danger-bg: rgba(239, 68, 68, 0.1);
+  --neutral-bg: rgba(113, 113, 122, 0.1);
   
   --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
@@ -110,11 +110,14 @@ body {
 
 .kpi-card {
   background-color: var(--surface-color);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border: 1px solid var(--border-color);
-  border-radius: 4px;
+  border-radius: 6px;
   padding: 1.25rem;
   display: flex;
   flex-direction: column;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 .kpi-label {
@@ -147,8 +150,11 @@ body {
 /* Panels */
 .panel {
   background-color: var(--surface-color);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border: 1px solid var(--border-color);
-  border-radius: 4px;
+  border-radius: 6px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 .panel-header {
@@ -285,11 +291,14 @@ tr:last-child td {
 }
 
 .suggestion-card {
-  background-color: var(--bg-color);
+  background-color: rgba(45, 45, 50, 0.4);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   border: 1px solid var(--border-color);
-  border-radius: 4px;
+  border-radius: 6px;
   padding: 1.25rem;
   position: relative;
+  box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1);
 }
 
 .suggestion-card::before {

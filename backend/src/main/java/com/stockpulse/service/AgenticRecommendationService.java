@@ -42,10 +42,12 @@ public class AgenticRecommendationService {
 
     @Async
     @EventListener
-    @Transactional
     public void handleProductStateChanged(ProductStateChangedEvent event) {
         log.info("Processing recommendation event for Product: {}. Trigger reason: {}", 
                  event.getProductId(), event.getTriggerReason());
+
+        String lockKey = (event.getProductId() + "-" + event.getTriggerReason().name()).intern();
+        synchronized (lockKey) {
 
         try {
             Product p = productRepo.findById(event.getProductId()).orElse(null);
@@ -87,6 +89,7 @@ public class AgenticRecommendationService {
             
         } catch (Exception e) {
             log.error("Failed to process ProductStateChangedEvent for product: {}", event.getProductId(), e);
+        }
         }
     }
 }
